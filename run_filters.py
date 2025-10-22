@@ -29,7 +29,11 @@ for condition, csv in metrics_path.items():
   global_df=pd.concat([global_df, df])
 
 output_folder=
+
 # boxplots
-boxplot_...
+columns_to_plot = ['interface_dSASA', 'Average_n_InterfaceResidues', 'interface_interface_hbonds', 'interface_hbond_percentage']
+condition_boxplots(global_df, columns_to_plot, output_folder)
+
+
 
 
