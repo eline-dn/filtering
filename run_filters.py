@@ -122,7 +122,7 @@ plt.title("ipTM Scatterplot for the ipTM values from the reprediction with initi
 plt.legend(title="Binders selected with case 1 filters")
 plt.savefig("{output_folder}/scatter_2.png")
 
-# scatter plot for case n°3
+# scatter plot for case n°3 
 _=sns.scatterplot(data=global_df, x='cofold_mean_plugged_i_pTM', y='cofold_mean_empty_i_pTM',hue='selected1')
 plugged_ipTM = 0.8
 plt.axvline(x=plugged_ipTM, ymin=0, ymax=1, color="black", linestyle="--")
