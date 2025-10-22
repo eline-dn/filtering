@@ -109,6 +109,7 @@ plt.title("ipTM Scatterplot for the ipTM values from the reprediction with targe
 plt.legend(title="Binders selected with case 1 filters")
 plt.savefig(f"{output_folder}/scatter_1.png")
 plt.close()
+
 # scatter plot for case n°2
 _=sns.scatterplot(data=global_df, x='mean_plugged_i_pTM', y='mean_empty_i_pTM',hue='selected1')
 plugged_ipTM = 0.8
@@ -123,6 +124,7 @@ plt.title("ipTM Scatterplot for the ipTM values from the reprediction with initi
 plt.legend(title="Binders selected with case 1 filters")
 plt.savefig(f"{output_folder}/scatter_2.png")
 plt.close()
+
 # scatter plot for case n°3 
 _=sns.scatterplot(data=global_df, x='cofold_mean_plugged_i_pTM', y='cofold_mean_empty_i_pTM',hue='selected1')
 plugged_ipTM = 0.8
