@@ -124,7 +124,7 @@ plt.close()
 
 # plot final selected binders 
 selected12_binder_list=global_df[(global_df['specific_mean_empty_i_pTM'] <0.5) & (global_df['specific_mean_plugged_i_pTM'] >=0.8)& (global_df['interface_dSASA']>=1700)
-& (df['specific_mean_empty_i_pTM'] <=0.5) & (df['specific_mean_plugged_i_pTM'] >=0.8)].Design
+& (global_df['specific_mean_empty_i_pTM'] <=0.5) & (global_df['specific_mean_plugged_i_pTM'] >=0.8)].Design
 global_df['selected12'] = global_df['Design'].isin(selected12_binder_list)
 
 # scatter plot for case n°1
