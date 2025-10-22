@@ -25,12 +25,10 @@ metrics_output=sys.argv[2] # path to the folder where every condition's run_metr
 output_folder=sys.argv[3] # where to store the successful binders and plots
 
  
-# dealing with 1st reprediction metrics (specific target)
-filtered_binders_pdbs_spec=f"{output_folder}/filtered_binders_spec"
-os.makedirs(filtered_binders_pdbs_spec, exist_ok=True)
-#dealing with metrics from 2nd prediction (aspecific target)
-filtered_binders_pdbs_non_spec=f"{output_folder}/filtered_binders_non_spec"
-os.makedirs(filtered_binders_pdbs_non_spec, exist_ok=True)
+
+# saving binders that pass filters for 1st prediction and 2nd prediction metrics
+filtered_binders_pdbs=f"{output_folder}/filtered_binders"
+os.makedirs(filtered_binders_pdbs, exist_ok=True)
 
 cond_list=[3,9,10,11,12]
 
@@ -45,14 +43,13 @@ for i in cond_list:
   #filtering
   df=compute_specific_metrics(df)
   df=compute_nonspecific_metrics(df)
-  df=compute_cofolding_metrics(df)
-  ## filters on non_specific reprediction scores
-  filtered_df_non_specific = df[(df['mean_empty_i_pTM'] <0.5) & (df['mean_plugged_i_pTM'] >=0.8) & (df['interface_dSASA']>=1700)]
-  ## filters on specific reprediction scores
-  filtered_df_specific = df[(df['specific_mean_empty_i_pTM'] <0.5) & (df['specific_mean_plugged_i_pTM'] >=0.8)& (df['interface_dSASA']>=1700)]
+  #df=compute_cofolding_metrics(df)
+  ## filters on non_specific reprediction scores AND on specific reprediction scores
+  filtered_df = df[(df['mean_empty_i_pTM'] <=0.5) & (df['mean_plugged_i_pTM'] >=0.8) & (df['interface_dSASA']>=1700)
+     & (df['specific_mean_empty_i_pTM'] <=0.5) & (df['specific_mean_plugged_i_pTM'] >=0.8)]
+  
   ## exctract the interesting binders
-  extract_filtered_binders(filtered_df_non_specific, accepted_folder, filtered_binders_pdbs_non_spec)
-  extract_filtered_binders(filtered_df_specific, accepted_folder, filtered_binders_pdbs_spec)
+  extract_filtered_binders(filtered_df, accepted_folder, filtered_binders_pdbs)
   # concat:
   print("Concatenating to global df--------------")
   global_df=pd.concat([global_df, df])
@@ -125,8 +122,13 @@ plt.legend(title="Binders selected with case 1 filters")
 plt.savefig(f"{output_folder}/scatter_2.png")
 plt.close()
 
-# scatter plot for case n°3 
-_=sns.scatterplot(data=global_df, x='cofold_mean_plugged_i_pTM', y='cofold_mean_empty_i_pTM',hue='selected1')
+# plot final selected binders 
+selected12_binder_list=global_df[(global_df['specific_mean_empty_i_pTM'] <0.5) & (global_df['specific_mean_plugged_i_pTM'] >=0.8)& (global_df['interface_dSASA']>=1700)
+& (df['specific_mean_empty_i_pTM'] <=0.5) & (df['specific_mean_plugged_i_pTM'] >=0.8)].Design
+global_df['selected12'] = global_df['Design'].isin(selected12_binder_list)
+
+# scatter plot for case n°1
+_=sns.scatterplot(data=global_df, x='specific_mean_plugged_i_pTM', y='specific_mean_empty_i_pTM',hue='selected12')
 plugged_ipTM = 0.8
 plt.axvline(x=plugged_ipTM, ymin=0, ymax=1, color="black", linestyle="--")
 empty_ipTM = 0.5
@@ -135,11 +137,25 @@ plt.axhline(
 )
 plt.xlabel("Plugged i_pTM ")
 plt.ylabel("Empty i_pTM")
-plt.title("ipTM Scatterplot for the ipTM values from the reprediction without target template (case 3)")
-plt.legend(title="Binders selected with case 1 filters")
-plt.savefig(f"{output_folder}/scatter_3.png")
+plt.title("Reprediction with target from BC ipTMs (case 1)")
+plt.legend(title="Binders selected with case 1 + case 2 filters")
+plt.savefig(f"{output_folder}/scatter_1_12.png")
 plt.close()
 
+# scatter plot for case n°2
+_=sns.scatterplot(data=global_df, x='mean_plugged_i_pTM', y='mean_empty_i_pTM',hue='selected12')
+plugged_ipTM = 0.8
+plt.axvline(x=plugged_ipTM, ymin=0, ymax=1, color="black", linestyle="--")
+empty_ipTM = 0.5
+plt.axhline(
+    y=empty_ipTM, xmin=0, xmax=1, color="black", linestyle="--"
+)
+plt.xlabel("Plugged i_pTM ")
+plt.ylabel("Empty i_pTM")
+plt.title("Reprediction with initial target ipTMs (case 2)")
+plt.legend(title="Binders selected with case 1 + case 2 filters")
+plt.savefig(f"{output_folder}/scatter_2_12.png")
+plt.close()
 
 
 # end of the script: how long?
