@@ -8,7 +8,7 @@ steps:
 
 """
 
-
+import sys
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -16,6 +16,7 @@ import glob
 import shutil
 import os
 from filters_utils import *
+import time
 
 script_start_time = time.time()
 global_df=pd.DataFrame()
@@ -34,9 +35,8 @@ os.makedirs(filtered_binders_pdbs_non_spec, exist_ok=True)
 cond_list=[3,9,10,11,12]
 
 for i in cond_list:
-  
   csv=f"{metrics_output}/n{i}/metrics.csv"
-  design_folder=f"{BC_output}/n{i}/Accepted"
+  accepted_folder=f"{BC_output}/n{i}/Accepted"
   condition=f"n{i}"
   # load the metrics.csv df
   df=pd.read_csv(csv)
@@ -50,13 +50,14 @@ for i in cond_list:
   ## filters on specific reprediction scores
   filtered_df_specific = df[(df['specific_mean_empty_i_pTM'] <0.5) & (df['specific_mean_plugged_i_pTM'] >=0.8)& (df['interface_dSASA']>=1700)]
   ## exctract the interesting binders
-  extract_filtered_binders(filtered_df_non_specific, design_folder, filtered_binders_pdbs_non_spec)
-  extract_filtered_binders(filtered_df_specific, design_folder, filtered_binders_pdbs_spec)
-  
+  extract_filtered_binders(filtered_df_non_specific, accepted_folder, filtered_binders_pdbs_non_spec)
+  extract_filtered_binders(filtered_df_specific, accepted_folder, filtered_binders_pdbs_spec)
   # concat:
-   print("Concatenating to global df--------------")
-   global_df=pd.concat([global_df, df])
+  print("Concatenating to global df--------------")
+  global_df=pd.concat([global_df, df])
 
+# save global df
+global_df.to_csv(f"{output_folder}/global_metrics_df.csv")
 
 # boxplots
 columns_to_plot = ['interface_dSASA', 'Average_n_InterfaceResidues', 'interface_interface_hbonds', 'interface_hbond_percentage']
@@ -67,7 +68,7 @@ columns = ['specific_mean_empty_i_pTM', 'specific_mean_plugged_i_pTM']
 _ = sns.pairplot(
     data=global_df,
     vars=columns,
-    hue=condition,
+    hue='condition',
     plot_kws={"alpha": 0.2},
     height=3,
     diag_kind="hist",
@@ -76,10 +77,10 @@ _ = sns.pairplot(
 plt.savefig(f"{output_folder}/pairplot_specific_iptms.png")
 
 columns = ['mean_empty_i_pTM', 'mean_plugged_i_pTM']
- _ = sns.pairplot(
+_ = sns.pairplot(
     data=global_df,
     vars=columns,
-    hue=condition,
+    hue='condition',
     plot_kws={"alpha": 0.2},
     height=3,
     diag_kind="hist",
@@ -88,8 +89,8 @@ plt.savefig(f"{output_folder}/pairplot_iptms2.png")
 
 
 
-# save global df
-global_df.to_csv(f"{output_folder}/global_metrics_df.csv")
+
+
 
 
 # end of the script: how long?

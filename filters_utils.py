@@ -65,7 +65,7 @@ def compute_nonspecific_metrics(df):
   df['mean_plugged_Binder_RMSD_to_binding_site'] = df[['1_plugged_Binder_RMSD_to_binding_site', '2_plugged_Binder_RMSD_to_binding_site']].mean(axis=1)
   df['mean_empty_Binder_RMSD_to_binding_site'] = df[['1_empty_Binder_RMSD_to_binding_site', '2_empty_Binder_RMSD_to_binding_site']].mean(axis=1)
 
-   """ 
+  """ 
   columns = ['mean_empty_i_pTM', 'mean_plugged_i_pTM']
   _ = sns.pairplot(
     data=df,
@@ -80,17 +80,17 @@ def compute_nonspecific_metrics(df):
   return df
 
 # and a function to extract relevant binders from each final_stat.csv df from bindcraft
-def extract_filtered_binders(filtered_df, accepted_folders, filtered_binders_pdbs):
+def extract_filtered_binders(filtered_df, accepted_folder, filtered_binders_pdbs):
   """ 
   copies the interesting binders in filtered_df from accepted_folder to filtered_binders_pdbs
   """
   print(f"Filters on specific reprediction scores gave {len(filtered_df['Design'])} binders: {filtered_df['Design']}")
 
-  accepted_folder = f"{design_folder}/Accepted"
+  #accepted_folder = f"{design_folder}/Accepted"
   str_binders=''
   for binder_name in filtered_df['Design']:
   # retrieve .pdb file using glob to find the model number
-    pdb_files = glob.glob(f"{accepted_folder}/{binder_name}_model*.pdb")
+   pdb_files = glob.glob(f"{accepted_folder}/{binder_name}_model*.pdb")
    if not pdb_files:
        print(f"[Warning] No PDB file found for {binder_name} in {accepted_folder}")
        continue # Skip to the next binder if no file is found
@@ -98,11 +98,9 @@ def extract_filtered_binders(filtered_df, accepted_folders, filtered_binders_pdb
   #print(pdb_path)
    str_binders+=f"{pdb_path} "
   # also copy the relevant pdbs to a filtered_binders folder:
-    shutil.copy(pdb_path, filtered_binders_pdbs)
+   shutil.copy(pdb_path, filtered_binders_pdbs)
 
   print(str_binders)
-
-return df
 
 
 
