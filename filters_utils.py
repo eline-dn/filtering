@@ -79,6 +79,18 @@ def compute_nonspecific_metrics(df):
   """
   return df
 
+
+def compute_cofolding_metrics(df):
+  """
+  compute models mean for cofolding empty and plugged ipTM
+  """
+  df['cofold_mean_empty_i_pTM'] = df[['1_wrepred_empty_i_pTM', '2_wrepred_empty_i_pTM']].mean(axis=1)
+  df['cofold_mean_plugged_i_pTM'] = df[['1_wrepred_plugged_i_pTM', '2_wrepred_plugged_i_pTM']].mean(axis=1)
+  df['cofold_mean_plugged_Binder_RMSD_to_binding_site'] = df[['1_wrepred_plugged_Binder_RMSD_to_binding_site', '2_wrepred_plugged_Binder_RMSD_to_binding_site']].mean(axis=1)
+  df['cofold_mean_empty_Binder_RMSD_to_binding_site'] = df[['1_wrepred_empty_Binder_RMSD_to_binding_site', '2_wrepred_empty_Binder_RMSD_to_binding_site']].mean(axis=1)
+  return df
+
+
 # and a function to extract relevant binders from each final_stat.csv df from bindcraft
 def extract_filtered_binders(filtered_df, accepted_folder, filtered_binders_pdbs):
   """ 
