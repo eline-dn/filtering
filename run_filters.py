@@ -90,3 +90,9 @@ plt.savefig(f"{output_folder}/pairplot_iptms2.png")
 
 # save global df
 global_df.to_csv(f"{output_folder}/global_metrics_df.csv")
+
+
+# end of the script: how long?
+elapsed_time = time.time() - script_start_time
+elapsed_text = f"{'%d hours, %d minutes, %d seconds' % (int(elapsed_time // 3600), int((elapsed_time % 3600) // 60), int(elapsed_time % 60))}"
+print("Finished filtering. Script execution took: "+elapsed_text)
