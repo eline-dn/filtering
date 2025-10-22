@@ -66,7 +66,7 @@ reprediction_cols=['1_empty_pLDDT', '1_empty_pTM', '1_empty_i_pTM', '1_empty_pAE
        '2_plugged_pTM', '2_plugged_i_pTM', '2_plugged_pAE', '2_plugged_i_pAE',
        '2_plugged_Binder_RMSD_to_binding_site']
 
-
+"""
 whole_reprediction_cols=['1_wrepred_empty_pLDDT', '1_wrepred_empty_pTM',
        '1_wrepred_empty_i_pTM', '1_wrepred_empty_pAE',
        '1_wrepred_empty_i_pAE','1_wrepred_empty_Binder_RMSD_to_binding_site', '2_wrepred_empty_pLDDT',
@@ -78,9 +78,9 @@ whole_reprediction_cols=['1_wrepred_empty_pLDDT', '1_wrepred_empty_pTM',
        '2_wrepred_plugged_pTM', '2_wrepred_plugged_i_pTM',
        '2_wrepred_plugged_pAE', '2_wrepred_plugged_i_pAE','2_wrepred_plugged_Binder_RMSD_to_binding_site']
 
+"""
 
-
-df_metrics=pd.DataFrame(columns= required_cols + rosetta_cols + specific_reprediction_cols +reprediction_cols + whole_reprediction_cols)
+df_metrics=pd.DataFrame(columns= required_cols + rosetta_cols + specific_reprediction_cols +reprediction_cols )
 csv_file= os.path.join(output_folder, 'metrics.csv')
 df_metrics.to_csv(csv_file, index=False)
 
@@ -177,7 +177,7 @@ for binder_name in final_csv['Design']:
   print(ipTM_reprediction_df)
   df= pd.concat([df, ipTM_reprediction_df], axis=1)
   
-
+"""
 ### 3) binder and target co-folding, based only on their sequences
   
 
@@ -187,6 +187,7 @@ for binder_name in final_csv['Design']:
   whole_reprediction_df=pd.concat([empty_prediction_stats_df, plugged_prediction_stats_df], axis=1)
   print(whole_reprediction_df)
   df= pd.concat([df, whole_reprediction_df], axis=1)
+  """
 
 ### eventually: add binder specific data to global metrics df
 
