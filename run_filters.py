@@ -157,9 +157,11 @@ plt.legend(title="Binders selected with case 1 + case 2 filters")
 plt.savefig(f"{output_folder}/scatter_2_12.png")
 plt.close()
 
+
+
 # write out successful binders .csv file
 success_df=global_df[(global_df['specific_mean_empty_i_pTM'] <0.5) & (global_df['specific_mean_plugged_i_pTM'] >=0.8)& (global_df['interface_dSASA']>=1700)
-& (df['specific_mean_empty_i_pTM'] <=0.5) & (df['specific_mean_plugged_i_pTM'] >=0.8)]
+& (global_df['specific_mean_empty_i_pTM'] <=0.5) & (global_df['specific_mean_plugged_i_pTM'] >=0.8)]
 success_df.to_csv(f"{filtered_binders_pdbs}/selected_binder_metrics_df.csv")
 
 # end of the script: how long?
