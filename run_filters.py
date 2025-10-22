@@ -63,7 +63,7 @@ global_df.to_csv(f"{output_folder}/global_metrics_df.csv")
 # boxplots
 columns_to_plot = ['interface_dSASA', 'Average_n_InterfaceResidues', 'interface_interface_hbonds', 'interface_hbond_percentage']
 condition_boxplots(global_df, columns_to_plot, output_folder)
-
+plt.close()
 # ipTM pairplots
 columns = ['specific_mean_empty_i_pTM', 'specific_mean_plugged_i_pTM']
 _ = sns.pairplot(
@@ -76,6 +76,7 @@ _ = sns.pairplot(
     diag_kws={"bins": 30},)
 
 plt.savefig(f"{output_folder}/pairplot_specific_iptms.png")
+plt.close()
 
 columns = ['mean_empty_i_pTM', 'mean_plugged_i_pTM']
 _ = sns.pairplot(
@@ -87,7 +88,7 @@ _ = sns.pairplot(
     diag_kind="hist",
     diag_kws={"bins": 30},)
 plt.savefig(f"{output_folder}/pairplot_iptms2.png")
-
+plt.close()
 
 
 # plot the ipTM scatter plots with thresholds and compare them, highlight selected binders from the first round of selection
@@ -106,8 +107,8 @@ plt.xlabel("Plugged i_pTM ")
 plt.ylabel("Empty i_pTM")
 plt.title("ipTM Scatterplot for the ipTM values from the reprediction with target from BC (case 1)")
 plt.legend(title="Binders selected with case 1 filters")
-plt.savefig("{output_folder}/scatter_1.png")
-
+plt.savefig(f"{output_folder}/scatter_1.png")
+plt.close()
 # scatter plot for case n°2
 _=sns.scatterplot(data=global_df, x='mean_plugged_i_pTM', y='mean_empty_i_pTM',hue='selected1')
 plugged_ipTM = 0.8
@@ -120,8 +121,8 @@ plt.xlabel("Plugged i_pTM ")
 plt.ylabel("Empty i_pTM")
 plt.title("ipTM Scatterplot for the ipTM values from the reprediction with initial target (case 2)")
 plt.legend(title="Binders selected with case 1 filters")
-plt.savefig("{output_folder}/scatter_2.png")
-
+plt.savefig(f"{output_folder}/scatter_2.png")
+plt.close()
 # scatter plot for case n°3 
 _=sns.scatterplot(data=global_df, x='cofold_mean_plugged_i_pTM', y='cofold_mean_empty_i_pTM',hue='selected1')
 plugged_ipTM = 0.8
@@ -134,7 +135,8 @@ plt.xlabel("Plugged i_pTM ")
 plt.ylabel("Empty i_pTM")
 plt.title("ipTM Scatterplot for the ipTM values from the reprediction without target template (case 3)")
 plt.legend(title="Binders selected with case 1 filters")
-plt.savefig("{output_folder}/scatter_3.png")
+plt.savefig(f"{output_folder}/scatter_3.png")
+plt.close()
 
 
 
