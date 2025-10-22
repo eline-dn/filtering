@@ -79,7 +79,7 @@ def compile_prediction_models(hardtarget_mode,data_dir): #-> prediction_model
                         data_dir=data_dir,
                         use_multimer=True,
                         use_initial_guess=hardtarget_mode,
-                        #use_template=True,
+                        use_templates=True,
                         use_initial_atom_pos=False )
     return complex_prediction_model
 
