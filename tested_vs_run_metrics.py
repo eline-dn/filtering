@@ -1,16 +1,18 @@
 """
 The purpose of this script is to apply a set of metrics/filters to all the binders that have been experimentally tested in the BindCraft paper
-1st argument should be the path to a folder, with a design_stats.csv file with binders and bindin information and an "Accepted" folder, with the binders' pdbs. 
+1st argument should be the path to a folder, with a design_stats.csv file with binders and binding information and an "Accepted" folder, with the binders' pdbs. 
 2nd argument should be the path to an output folder, were all the analyses can be stored
 
 """
 from rosetta_functions import *
-import os
+import os, shutil
 from metrics_utils import *
 import pandas as pd
 import glob 
 import time
 from cofolding_utils import *
+from Bio.PDB import PDBList
+
 
 script_start_time = time.time()
 design_folder=sys.argv[1]
@@ -30,6 +32,20 @@ target_dict={"IFNAR2": "2LAG",
             "SpCas9": "4ZT0"}
 target2skip= ["BetV1" , "PD1", "PD-L1"]
 # create: target_path_dict, (fetch all target pdb structures and save them as a .pdb file
+pdbl = PDBList()
+target_path_dict={}
+for target, pdb_id in target_dict.items():
+            target_dir=output_folder
+            # download structure (.pdb file)
+            file_path = pdbl.retrieve_pdb_file(pdb_id, pdir=target_dir, file_format="pdb")
+            print(f"PDB saved to: {file_path}")
+            new_path = os.path.join(target_dir, f"{target}.pdb")
+            shutil.move(file_path, new_path)
+            print(f"Renamed to: {new_path}")
+            target_path_dict[target]=new_path
+
+print(target_path_dict)
+
 
 required_cols = [
         "Target","DesignName","Binding","Sequence","InterfaceResidues","Average_pLDDT", "Average_pTM", "Average_i_pTM",
@@ -90,11 +106,42 @@ for binder_name in final_csv['DesignName']:
 
   prediction_model=compile_prediction_models(hardtarget_mode=False,data_dir=params) 
   # Run re-predictions with the  non-specific templates
+  model.prep_inputs(pdb_filename=initial_target_pdb,
+                        chain="A",
+                        #binder_chain="B",# do not specifiy if the template only contains the target
+                        binder_len=binder_len,
+                        rm_target_seq=False, #b
+                        use_binder_template=False, #a
+                        rm_template_ic=False #c
+                        )
+  prediction_stats = {}
+  for model_num in [0,1]:
+     model.predict(seq=binder_sequence,
+                    models=[model_num],
+                    num_recycles=3)
+     os.makedirs(f"{output_folder}/predicted_models", exist_ok=True)
+     predicted_folder=f"{output_folder}/predicted_models"
+     predicted_complex_pdb = os.path.join(predicted_folder, f"{binder_name}_model_{model_num+1}_repredicted.pdb")
+     model.save_pdb(predicted_complex_pdb)
+     prediction_metrics = copy_dict(model.aux["log"]) # contains plddt, ptm, i_ptm, pae, i_pae
 
-  
+            # extract the statistics for the model
+     stats = {
+                f"it_pLDDT": round(prediction_metrics['plddt'], 2),
+                f"it_pTM": round(prediction_metrics['ptm'], 2),
+                f"it_i_pTM": round(prediction_metrics['i_ptm'], 2),
+                f"it_pAE": round(prediction_metrics['pae'], 2),
+                f"it_i_pAE": round(prediction_metrics['i_pae'], 2)
+            }
+
+  # unaligned RMSD calculate to determine if binder is in the designed binding site
+    rmsd_site = unaligned_rmsd(pdb_path, predicted_complex_pdb, "B", "B")
+    stats[f"it_Binder_RMSD_to_binding_site"] = rmsd_site # this should be used to filter the models that are binding in the predicted binding site
+
+    prediction_stats[model_num+1] = stats # 2 dictionnaries index 1 and 2 to eventually add to the metrics df
+  ipTM_reprediction_df = transform_prediction_stats_to_df(prediction_stats)
 
 
-  ipTM_reprediction_df=pd.concat([empty_prediction_stats_df, plugged_prediction_stats_df], axis=1)
   print(ipTM_reprediction_df)
   df= pd.concat([df, ipTM_reprediction_df], axis=1)
 
