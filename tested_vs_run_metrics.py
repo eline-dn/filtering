@@ -4,7 +4,7 @@ The purpose of this script is to apply a set of metrics/filters to all the binde
 2nd argument should be the path to an output folder, were all the analyses can be stored
 
 """
-from rosetta_functions import *
+#from rosetta_functions import *
 import os, shutil
 from metrics_utils import *
 import pandas as pd
@@ -48,7 +48,7 @@ print(target_path_dict)
 
 
 required_cols = [
-        "Target","DesignName","Binding","Sequence","InterfaceResidues","Average_pLDDT", "Average_pTM", "Average_i_pTM",
+        "Target","DesignName","Binding","Sequence","Average_pLDDT", "Average_pTM", "Average_i_pTM",
         "Average_pAE", "Average_i_pAE", "Average_i_pLDDT", "Average_ss_pLDDT",
         "Average_dSASA", "Average_Interface_SASA_%", "Average_Interface_Hydrophobicity",
         "Average_n_InterfaceResidues", "Average_Binder_pLDDT", "Average_Binder_pTM",
@@ -57,10 +57,10 @@ required_cols = [
 
 
 
-reprediction_cols=['1_pLDDT', '1_pTM', '1_i_pTM', '1_pAE',
-       '1_i_pAE', '1_Binder_RMSD_to_binding_site', '2_pLDDT',
-       '2_pTM', '2_i_pTM', '2_pAE', '2_i_pAE',
-       '2_Binder_RMSD_to_binding_site']
+reprediction_cols=['1_it_pLDDT', '1_it_pTM', '1_it_i_pTM', '1_it_pAE',
+       '1_it_i_pAE', '1_it_Binder_RMSD_to_binding_site', '2_it_pLDDT',
+       '2_it_pTM', '2_it_i_pTM', '2_it_pAE', '2_it_i_pAE',
+       '2_it_Binder_RMSD_to_binding_site']
 
 
 df_metrics=pd.DataFrame(columns= required_cols  + reprediction_cols )
@@ -78,7 +78,7 @@ for binder_name in final_csv['DesignName']:
 
  
 ### retrieve interesting BC computations and Rosetta metrics
-  BC_metrics_dict= load_bindcraft_metrics(final_csv, binder_name, required_cols)
+  BC_metrics_dict= load_bindcraft_metrics_bis(final_csv, binder_name, required_cols)
   """    
   # compute rosetta metrics
   design_interface_scores_dict = score_interface(pdb_path, binder_chain="B")
@@ -89,11 +89,11 @@ for binder_name in final_csv['DesignName']:
   df= pd.concat([BC_metrics_df, rosetta_metrics_df], axis=1)
   """
 
-  binder_sequence=final_csv.loc[final_csv['Design'] == binder_name, 'Sequence'].iloc[0]
-  length=len(binder_sequence)
+  binder_sequence=final_csv.loc[final_csv['DesignName'] == binder_name, 'Sequence'].iloc[0]
+  binder_length=len(binder_sequence)
   # get target pdb name from the target_dictionnary:
   
-  target_name=final_csv.loc[final_csv['Design'] == binder_name, 'Target'].iloc[0]
+  target_name=final_csv.loc[final_csv['DesignName'] == binder_name, 'Target'].iloc[0]
   if target_name in target2skip:
           continue # skip to the next binder
   else:
@@ -106,24 +106,24 @@ for binder_name in final_csv['DesignName']:
 
   prediction_model=compile_prediction_models(hardtarget_mode=False,data_dir=params) 
   # Run re-predictions with the  non-specific templates
-  model.prep_inputs(pdb_filename=initial_target_pdb,
+  prediction_model.prep_inputs(pdb_filename=initial_target_pdb,
                         chain="A",
                         #binder_chain="B",# do not specifiy if the template only contains the target
-                        binder_len=binder_len,
+                        binder_len=binder_length,
                         rm_target_seq=False, #b
                         use_binder_template=False, #a
                         rm_template_ic=False #c
                         )
   prediction_stats = {}
   for model_num in [0,1]:
-     model.predict(seq=binder_sequence,
+     prediction_model.predict(seq=binder_sequence,
                     models=[model_num],
                     num_recycles=3)
      os.makedirs(f"{output_folder}/predicted_models", exist_ok=True)
      predicted_folder=f"{output_folder}/predicted_models"
      predicted_complex_pdb = os.path.join(predicted_folder, f"{binder_name}_model_{model_num+1}_repredicted.pdb")
-     model.save_pdb(predicted_complex_pdb)
-     prediction_metrics = copy_dict(model.aux["log"]) # contains plddt, ptm, i_ptm, pae, i_pae
+     prediction_model.save_pdb(predicted_complex_pdb)
+     prediction_metrics = copy_dict(prediction_model.aux["log"]) # contains plddt, ptm, i_ptm, pae, i_pae
 
             # extract the statistics for the model
      stats = {

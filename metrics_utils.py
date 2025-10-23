@@ -64,6 +64,29 @@ def load_bindcraft_metrics(df, design_name: str, required_cols = [
 
     #see functions.py file for pyRosetta functions
 
+def load_bindcraft_metrics_bis(df, design_name: str, required_cols) -> dict:
+
+
+
+    # Ensure expected columns exist
+
+    for col in required_cols:
+        if col not in df.columns:
+            raise ValueError(f"Missing expected column '{col}' in BindCraft CSV")
+
+    # Find the row corresponding to the design name
+    row = df.loc[df["DesignName"] == design_name]
+    if row.empty:
+        print(f"[Warning] Design '{design_name}' not found in {csv_path}")
+        return {}
+
+    # Convert that row (Series) to a dictionary, keeping only the metrics
+    row_dict = row.iloc[0][required_cols[:]].to_dict()
+
+    # Add the design name as a key for reference
+    #row_dict["Design"] = design_name
+
+    return row_dict
 
 
 
