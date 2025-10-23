@@ -70,7 +70,7 @@ df_metrics.to_csv(csv_file, index=False)
 for binder_name in final_csv['DesignName']: 
 #for binder_name in ["n3_l167_s137405_mpnn1","n3_l101_s821023_mpnn2"]: # used for debugging
   # retrieve .pdb file using glob to find the model number
-  pdb_files = glob.glob(f"{accepted_folder}/{binder_name}_model*.pdb")
+  pdb_files = glob.glob(f"{accepted_folder}/{binder_name}.pdb")
   if not pdb_files:
       print(f"[Warning] No PDB file found for {binder_name} in {accepted_folder}")
       continue # Skip to the next binder if no file is found
