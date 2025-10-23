@@ -31,6 +31,7 @@ target_dict={"IFNAR2": "2LAG",
             "HER2":"1N8Z",
             "SpCas9": "4ZT0"}
 target2skip= ["BetV1" , "PD1", "PD-L1"]
+# BetV1: 7MXL
 # create: target_path_dict, (fetch all target pdb structures and save them as a .pdb file
 pdbl = PDBList()
 target_path_dict={}
