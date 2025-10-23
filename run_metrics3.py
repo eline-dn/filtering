@@ -176,21 +176,20 @@ for binder_name in final_csv['Design']:
   ipTM_reprediction_df=pd.concat([empty_prediction_stats_df, plugged_prediction_stats_df], axis=1)
   print(ipTM_reprediction_df)
   df= pd.concat([df, ipTM_reprediction_df], axis=1)
-  
-"""
-### 3) binder and target co-folding, based only on their sequences
-  
+
+  """
+  ### 3) binder and target co-folding, based only on their sequences
+
 
   empty_reprediction_stats_df=run_whole_reprediction(binder_name=binder_name, binder_sequence=binder_sequence, target_path=empty_target_path_orig, empty=True, output_folder=output_folder,BC_complex_pdb=pdb_path,params=params)
   plugged_prediction_stats_df=run_whole_reprediction(binder_name=binder_name, binder_sequence=binder_sequence, target_path=plugged_target_path_orig, empty=False, output_folder=output_folder,BC_complex_pdb=pdb_path,params=params)
-  
+
   whole_reprediction_df=pd.concat([empty_prediction_stats_df, plugged_prediction_stats_df], axis=1)
   print(whole_reprediction_df)
   df= pd.concat([df, whole_reprediction_df], axis=1)
   """
 
-### eventually: add binder specific data to global metrics df
-
+  ### eventually: add binder specific data to global metrics df
   df.to_csv(csv_file, mode='a', header=False, index=False)# directly writes the new data in the csv file
 
 
