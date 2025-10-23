@@ -1,6 +1,6 @@
 """
 The purpose of this script is to apply a set of metrics/filters to all the binders that have been experimentally tested in the BindCraft paper
-1st argument should be the path to the BindCraft output folder, with a final_design_stats.csv and an "Accepted" folder.
+1st argument should be the path to a folder, with a design_stats.csv file with binders and bindin information and an "Accepted" folder, with the binders' pdbs. 
 2nd argument should be the path to an output folder, were all the analyses can be stored
 
 """
