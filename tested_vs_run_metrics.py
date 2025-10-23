@@ -88,6 +88,7 @@ for binder_name in final_csv['DesignName']:
   rosetta_metrics_df = pd.DataFrame(design_interface_scores_dict,index=[0])
   df= pd.concat([BC_metrics_df, rosetta_metrics_df], axis=1)
   """
+  df = pd.DataFrame(BC_metrics_dict,index=[0])
 
   binder_sequence=final_csv.loc[final_csv['DesignName'] == binder_name, 'Sequence'].iloc[0]
   binder_length=len(binder_sequence)
