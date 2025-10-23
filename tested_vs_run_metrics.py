@@ -133,12 +133,11 @@ for binder_name in final_csv['DesignName']:
                 f"it_pAE": round(prediction_metrics['pae'], 2),
                 f"it_i_pAE": round(prediction_metrics['i_pae'], 2)
             }
+     # unaligned RMSD calculate to determine if binder is in the designed binding site
+     rmsd_site = unaligned_rmsd(pdb_path, predicted_complex_pdb, "B", "B")
+     stats[f"it_Binder_RMSD_to_binding_site"] = rmsd_site # this should be used to filter the models that are binding in the predicted binding site
 
-  # unaligned RMSD calculate to determine if binder is in the designed binding site
-    rmsd_site = unaligned_rmsd(pdb_path, predicted_complex_pdb, "B", "B")
-    stats[f"it_Binder_RMSD_to_binding_site"] = rmsd_site # this should be used to filter the models that are binding in the predicted binding site
-
-    prediction_stats[model_num+1] = stats # 2 dictionnaries index 1 and 2 to eventually add to the metrics df
+     prediction_stats[model_num+1] = stats # 2 dictionnaries index 1 and 2 to eventually add to the metrics df
   ipTM_reprediction_df = transform_prediction_stats_to_df(prediction_stats)
 
 
