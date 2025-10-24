@@ -1,4 +1,5 @@
 import sys
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -10,9 +11,9 @@ import time
 
 script_start_time = time.time()
 global_df=pd.DataFrame()
-BC_output=sys.argv[1] # path to the folder where every condition's BC output folder can be found. Each condition's folder must contain an Accepted folder with the binders' pdbs
-metrics_output=sys.argv[2] # path to the ./metrics.csv folder
-output_folder=sys.argv[3] # where to store plots?
+#BC_output=sys.argv[1] # path to the folder where every condition's BC output folder can be found. Each condition's folder must contain an Accepted folder with the binders' pdbs
+metrics_output=sys.argv[1] # path to the ./metrics.csv folder
+output_folder=sys.argv[2] # where to store plots?
 
 
 csv=f"{metrics_output}/metrics.csv"
@@ -68,6 +69,7 @@ plt.savefig(f"{output_folder}/scatter_bindersvsfilters.png")
 plt.close()
 
 
+df.to_csv(f"{output_folder}/cleaned_df.csv")
 
 # end of the script: how long?
 elapsed_time = time.time() - script_start_time
