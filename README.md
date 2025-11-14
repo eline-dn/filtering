@@ -1,5 +1,4 @@
-# filtering
-*Selecting binders generated with BindCraft for experimental testing*
+# Filtering: *Selecting binders generated with BindCraft for experimental testing*
 ## To compute the different reprediction and rosetta metrics:
 run 'sbatch run_metrics.slurm' or 'python run_metrics3.py' for each condition
 with the following arguments: 
