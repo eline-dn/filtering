@@ -1,4 +1,7 @@
 # Filtering: *Selecting binders generated with BindCraft for experimental testing*
+
+This is a filtering pipeline to select "good binders" from BindCraft's outputs. The selected binders will be tested experimentally. Here, our design campain's goal was to design a protein binder binding to a beta-barrel plugged by a peptide, while not binding to the "empty" beta-barrel (not plugged by a peptide). The binders are filtered based on the "plugged ipTM", "empty" ipTM and repredicted RMSD to the initial prediction.
+
 ## To compute the different reprediction and rosetta metrics:
 run 'sbatch run_metrics.slurm' or 'python run_metrics3.py' for each condition
 with the following arguments: 
