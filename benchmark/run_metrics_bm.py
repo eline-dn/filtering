@@ -34,6 +34,57 @@ predicted_folder=f"{output_folder}/predicted_models"
 params = '/work/lpdi/users/goldbach/software/colabdesign/params'
 
 # ---------------helpers--------------------
+# relaxation
+# clean unnecessary rosetta information from PDB
+def clean_pdb(pdb_file):
+    # Read the pdb file and filter relevant lines
+    with open(pdb_file, 'r') as f_in:
+        relevant_lines = [line for line in f_in if line.startswith(('ATOM', 'HETATM', 'MODEL', 'TER', 'END', 'LINK'))]
+
+    # Write the cleaned lines back to the original pdb file
+    with open(pdb_file, 'w') as f_out:
+        f_out.writelines(relevant_lines)
+# Relax designed structure
+def pr_relax(pdb_file, relaxed_pdb_path):
+    if not os.path.exists(relaxed_pdb_path):
+        # Generate pose
+        pose = pr.pose_from_pdb(pdb_file)
+        start_pose = pose.clone()
+
+        ### Generate movemaps
+        mmf = MoveMap()
+        mmf.set_chi(True) # enable sidechain movement
+        mmf.set_bb(True) # enable backbone movement, can be disabled to increase speed by 30% but makes metrics look worse on average
+        mmf.set_jump(False) # disable whole chain movement
+
+        # Run FastRelax
+        fastrelax = FastRelax()
+        scorefxn = pr.get_fa_scorefxn()
+        fastrelax.set_scorefxn(scorefxn)
+        fastrelax.set_movemap(mmf) # set MoveMap
+        fastrelax.max_iter(200) # default iterations is 2500
+        fastrelax.min_type("lbfgs_armijo_nonmonotone")
+        fastrelax.constrain_relax_to_start_coords(True)
+        fastrelax.apply(pose)
+
+        # Align relaxed structure to original trajectory
+        align = AlignChainMover()
+        align.source_chain(0)
+        align.target_chain(0)
+        align.pose(start_pose)
+        align.apply(pose)
+
+        # Copy B factors from start_pose to pose
+        for resid in range(1, pose.total_residue() + 1):
+            if pose.residue(resid).is_protein():
+                # Get the B factor of the first heavy atom in the residue
+                bfactor = start_pose.pdb_info().bfactor(resid, 1)
+                for atom_id in range(1, pose.residue(resid).natoms() + 1):
+                    pose.pdb_info().bfactor(resid, atom_id, bfactor)
+
+        # output relaxed and aligned PDB
+        pose.dump_pdb(relaxed_pdb_path)
+        clean_pdb(relaxed_pdb_path)
 # Helper: compute aligned rmsd with superimposer from ca list obtained with get_ca_atoms
 def get_ca_atoms(chain):
     atoms = []
@@ -221,8 +272,14 @@ for binder_name in binder_csv['id']:
             f"pAE_{model_num}": round(prediction_metrics['pae'], 2),
             f"i_pAE_{model_num}": round(prediction_metrics['i_pae'], 2)
         }
+        # add relaxation before computing the metrics
+        # Relax binder to calculate statistics
+        predicted_complex_relaxed = os.path.join(predicted_folder, f"{binder_name}_model_{model_num+1}_relaxed.pdb")
+        pr_relax(predicted_complex_pdb, predicted_complex_relaxed)
+
+        
         # 3 - compute rosetta metrics
-        design_interface_scores_dict = score_interface(predicted_complex_pdb, binder_chain="B")
+        design_interface_scores_dict = score_interface(predicted_complex_relaxed, binder_chain="B")
         design_interface_scores_dict = {
         f"{key}_{model_num}": value
         for key, value in design_interface_scores_dict.items()
