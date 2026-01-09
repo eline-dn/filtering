@@ -1,9 +1,12 @@
 """
 goal: apply the metrics to a set of experimentally validated binders to check the filters' predictive power and/ or check reproducibility of the scores
 """
-### dependancies
+### dependencies
+import os, sys
+SCRIPT_PATH = os.path.dirname(__file__)
+sys.path.append(f"{SCRIPT_PATH}/..")
+import shutil
 from rosetta_functions import *
-import os
 from metrics_utils import *
 import pandas as pd
 import glob 
@@ -13,7 +16,8 @@ import argparse
 from Bio.PDB import PDBList
 from Bio import BiopythonWarning
 from Bio.PDB import PDBParser, DSSP, Selection, Polypeptide, PDBIO, Select, Chain, Superimposer, MMCIFParser
-
+from collections import defaultdict
+import numbers
 
 ### setup
 script_start_time = time.time()
@@ -165,9 +169,11 @@ def average_paired_metrics(d):
 
     # group values by base metric name
     for key, value in d.items():
-        if key.endswith("_1") or key.endswith("_2"):
-            base = key.rsplit("_", 1)[0]
-            grouped[base].append(value)
+        if "_" in key and key.rsplit("_", 1)[-1].isdigit():
+            base, suffix = key.rsplit("_", 1)
+            # keep only numeric values
+            if isinstance(value, numbers.Number):
+                grouped[base].append(value)
 
     # compute averages
     averaged = {}
@@ -186,7 +192,7 @@ for binder_name in binder_csv['id']:
     target_pdb_path=get_target_template_path(binder_csv.loc[binder_csv['id'] == binder_name, 'target_pdb_id'].iloc[0],  output_folder)
     
     # 1 - reprediction with pdb template
-    binder_sequence=binder_csv.loc[binder_csv['Design'] == binder_name, 'sequence'].iloc[0]
+    binder_sequence=binder_csv.loc[binder_csv['id'] == binder_name, 'sequence'].iloc[0]
     binder_length=len(binder_sequence)
     prediction_model=compile_prediction_models(hardtarget_mode=False,data_dir=params) 
     # Run re-predictions with the  non-specific templates
@@ -217,34 +223,41 @@ for binder_name in binder_csv['id']:
         }
         # 3 - compute rosetta metrics
         design_interface_scores_dict = score_interface(predicted_complex_pdb, binder_chain="B")
-        for key in design_interface_scores_dict.keys():
-            key = key + f"_{model_num}"
+        design_interface_scores_dict = {
+        f"{key}_{model_num}": value
+        for key, value in design_interface_scores_dict.items()
+        }
+
         # 4 -  compute RMSDs: target rmsd and  later coherence between model 1 and model 2
-        rmsds={}
+        #rmsds={}
         from Bio.PDB import PDBParser, Selection
         parser = PDBParser(QUIET=True)
         ref=parser.get_structure("a",target_pdb_path)
         mov = parser.get_structure("x", predicted_complex_pdb)
-        rmsds[f"target_rmsd_{model_num}"]=aligned_chain_rmsd(ref, mov, ref_chain_id="A", mov_chain_id="A")
-        rmsds[f"binder_rmsd_{model_num}"]=aligned_chain_rmsd(ref, mov, ref_chain_id="B", mov_chain_id="B")
-        data={**rmsds, **design_interface_scores_dict, **stats}
+        #rmsds[f"target_rmsd_{model_num}"]=aligned_chain_rmsd(ref, mov, ref_chain_id="A", mov_chain_id="A")
+        #rmsds[f"binder_rmsd_{model_num}"]=aligned_chain_rmsd(ref, mov, ref_chain_id="B", mov_chain_id="B")
+        data={**design_interface_scores_dict, **stats}
         prediction_stats = {**prediction_stats, **data}
+        prediction_stats[f"target_rmsd_{model_num}"]=aligned_chain_rmsd(ref, mov, ref_chain_id="A", mov_chain_id="A")
+        #print(model_num, prediction_stats)
 
     # mean or compare the two model's outputs:
+    print(prediction_stats)
     avg_metrics = average_paired_metrics(prediction_stats)
     prediction_stats={**prediction_stats, **avg_metrics}
 
     # compute distance between the two predicted binding sites
     ref=parser.get_structure("a",os.path.join(predicted_folder, f"{binder_name}_model_1_repredicted.pdb"))
     mov = parser.get_structure("x", os.path.join(predicted_folder, f"{binder_name}_model_2_repredicted.pdb"))
+    prediction_stats["binder_delta_rmsd"]=aligned_chain_rmsd(ref, mov, ref_chain_id="B", mov_chain_id="B")
     mov_aligned=align_to_chain(ref,mov,{"A":"A", "B":"B"})
-	prediction_stats["d_binding_site"]=unaligned_rmsd(ref, mov_aligned, {"B":"B"})
+    prediction_stats["d_binding_site"]=unaligned_rmsd(ref, mov_aligned, {"B":"B"})
 
     # convert to df
     prediction_stats["id"]=binder_name
     df=pd.DataFrame(data=prediction_stats, index=[prediction_stats["id"]]) 
     # save to csv:
-    csv_path=os.path.joint(output_folder, "binder_scoring.csv")
+    csv_path=os.path.join(output_folder, "binder_scoring.csv")
     df.to_csv(csv_path, mode="a", index=False, header=not pd.io.common.file_exists(csv_path))
 
 
