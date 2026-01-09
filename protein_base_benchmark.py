@@ -102,8 +102,9 @@ for col in ["binding", "binding_target", "kd", "expressed"]:
         df[col] = df[col].apply(ensure_list)
 
 
-# 1. Remove binders with no binding information at all
+# 1. Remove binders with no binding  or expression information at all
 df = df[df["binding"].apply(len) > 0]
+df = df[df["expressed"].apply(len) > 0]
 
 
 # 2. Remove binders that did not express
@@ -137,7 +138,7 @@ def reduce_row(row):
     out = row.copy()
 
     # binding
-    out["binding"] = row["binding"][0] if row["binding"] else np.nan
+    out["binding"] = row["binding"][0] if row["binding"] else np.nan # np.nan case should not exist because of previous filtering
 
     # binding_target
     if row["binding_target"]:
