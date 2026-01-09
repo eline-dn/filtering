@@ -1,8 +1,5 @@
 """
-The purpose of this script is to apply a set of metrics/filters to all the binders in a folder (.pdb format) in order to extract the most relevant ones for experimental validation
-1st argument should be the path to the BindCraft output folder, with a final_design_stats.csv and an "Accepted" folder.
-2nd argument should be the path to an output folder, were all the analyses can be stored
-
+goal: apply the metrics to a set of experimentally validated binders to check the filters' predictive power and/ or check reproducibility of the scores
 """
 from rosetta_functions import *
 import os
@@ -11,21 +8,43 @@ import pandas as pd
 import glob 
 import time
 from cofolding_utils import *
+import argparse
+
+
 
 script_start_time = time.time()
-design_folder=sys.argv[1]
-output_folder=sys.argv[2]
 
-final_csv = pd.read_csv(f"{design_folder}/final_design_stats.csv")
-accepted_folder = f"{design_folder}/Accepted"
+parser = argparse.ArgumentParser()
+parser.add_argument("--binder_csv", required =True , type=str, help="path to a csv file with at least the following columns: id (unique for each binder), Sequence and target_pdb_id")
+parser.add_argument("--output_folder", required=True, type=str, help="to store target templates and analyses")
+args = parser.parse_args()
+
+binder_csv = pd.read_csv(args.binder_csv)
+output_folder=args.output_folder
+
 params = '/work/lpdi/users/goldbach/software/colabdesign/params'
 
-# empty target:
-empty_target_path_orig="/work/lpdi/users/eline/binderdesign/cagedH6_empty.pdb"
-# plugged target
-plugged_target_path_orig="/work/lpdi/users/eline/binderdesign/trimmed.pdb"
+# fetch target templates
+# if not already in output_folder, fetch from pdb
+for target_pdb in binder_csv["target_pdb_id"]:
+        
+target_dict
+# create: target_path_dict, (fetch all target pdb structures and save them as a .pdb file
+pdbl = PDBList()
+target_path_dict={}
+for target, pdb_id in target_dict.items():
+            target_dir=output_folder
+            # download structure (.pdb file)
+            file_path = pdbl.retrieve_pdb_file(pdb_id, pdir=target_dir, file_format="pdb")
+            print(f"PDB saved to: {file_path}")
+            new_path = os.path.join(target_dir, f"{target}.pdb")
+            shutil.move(file_path, new_path)
+            print(f"Renamed to: {new_path}")
+            target_path_dict[target]=new_path
 
+print(target_path_dict)
 
+"""
 required_cols = [
         "Design", "Sequence","InterfaceResidues","Average_pLDDT", "Average_pTM", "Average_i_pTM",
         "Average_pAE", "Average_i_pAE", "Average_i_pLDDT", "Average_ss_pLDDT",
@@ -65,7 +84,7 @@ reprediction_cols=['1_empty_pLDDT', '1_empty_pTM', '1_empty_i_pTM', '1_empty_pAE
        '1_plugged_Binder_RMSD_to_binding_site', '2_plugged_pLDDT',
        '2_plugged_pTM', '2_plugged_i_pTM', '2_plugged_pAE', '2_plugged_i_pAE',
        '2_plugged_Binder_RMSD_to_binding_site']
-
+"""
 """
 whole_reprediction_cols=['1_wrepred_empty_pLDDT', '1_wrepred_empty_pTM',
        '1_wrepred_empty_i_pTM', '1_wrepred_empty_pAE',
@@ -79,11 +98,13 @@ whole_reprediction_cols=['1_wrepred_empty_pLDDT', '1_wrepred_empty_pTM',
        '2_wrepred_plugged_pAE', '2_wrepred_plugged_i_pAE','2_wrepred_plugged_Binder_RMSD_to_binding_site']
 
 """
-
+"""
 df_metrics=pd.DataFrame(columns= required_cols + rosetta_cols + specific_reprediction_cols +reprediction_cols )
 csv_file= os.path.join(output_folder, 'metrics.csv')
 df_metrics.to_csv(csv_file, index=False)
+"""
 
+# iterate on binders 
 for binder_name in final_csv['Design']: 
 #for binder_name in ["n3_l167_s137405_mpnn1","n3_l101_s821023_mpnn2"]: # used for debugging
   # retrieve .pdb file using glob to find the model number
