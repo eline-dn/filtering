@@ -278,6 +278,17 @@ def average_paired_metrics(d):
 for binder_name in binder_csv['id']: 
     # find target template path, if it doesn't exist fetch it from pbd
     target_pdb_path=get_target_template_path(binder_csv.loc[binder_csv['id'] == binder_name, 'target_pdb_id'].iloc[0],  output_folder)
+  
+    # check that chain A exists in  ref pdb:
+    from Bio.PDB import PDBParser
+    parser = PDBParser(QUIET=True)
+    ref=parser.get_structure("a",target_pdb_path)
+    ref_model = next(ref.get_models())
+    try:
+      ref_chain = ref_model["A"]
+    except KeyError:
+      print(f"Reference chain '{A}' not found in {target_pdb_path}.")
+      continue
     
     # 1 - reprediction with pdb template
     binder_sequence=binder_csv.loc[binder_csv['id'] == binder_name, 'sequence'].iloc[0]
@@ -351,7 +362,7 @@ for binder_name in binder_csv['id']:
     prediction_stats["id"]=binder_name
     df=pd.DataFrame(data=prediction_stats, index=[prediction_stats["id"]]) 
     # save to csv:
-    csv_path=os.path.join(output_folder, "binder_scoring.csv")
+    csv_path=os.path.join(output_folder, "binder_scoring_pbase.csv")
     df.to_csv(csv_path, mode="a", index=False, header=not pd.io.common.file_exists(csv_path))
 
 
