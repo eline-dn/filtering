@@ -56,7 +56,8 @@ target_dict={# from bc:
   "der7": "3UV1",
   "ifnar2": "2LAG",
 "human-mzb1-perp1":"7AAH",
-"il7r": "5J11"}
+"il7r": "5J11",
+"human-idi2":"2PNY"}
 target2skip= ["BetV1" , "PD1", "PD-L1","CLDN1","Sas6", "human-tnfa"]
 
 def target2pdb(target_name, target_dict, target2skip):
