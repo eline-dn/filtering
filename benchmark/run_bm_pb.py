@@ -66,15 +66,15 @@ target_dict={# from bc:
 target2skip= ["BetV1" , "PD1", "PD-L1","CLDN1","Sas6", "human-tnfa", "mdm2", "fgf-r1"]
 
 def target2pdb(target_name, target_dict, target2skip):
-  if (target_name in target2skip.keys()) or (target_name not in target_dict.keys()) :
+  if (target_name in target2skip) or (target_name not in target_dict.keys()) :
     return(np.nan)
   else:
     return target_dict[target_name]
   
   
 binder_csv["target_pdb_id"]=binder_csv["binding_target"].apply(target2pdb, target_dict=target_dict, target2skip=target2skip)
-binder_csv=binder_csv.drop_na(subset=["target_pdb_id"])
-binder_csv.to_csv("f{output_folder}/ref_csv.csv")
+binder_csv=binder_csv.dropna(subset=["target_pdb_id"])
+binder_csv.to_csv(f"{output_folder}/ref_csv.csv")
 
 # ---------------helpers--------------------
 # relaxation
