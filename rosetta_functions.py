@@ -153,7 +153,7 @@ def score_interface(pdb_file, binder_chain="B"):
         interface_hbond_percentage = (interface_interface_hbonds / interface_nres) * 100 # Hbonds per interface size percentage
         #interface_bunsch_percentage = (interface_delta_unsat_hbonds / interface_nres) * 100 # Unsaturated H-bonds per percentage
     else:
-        interface_hbond_percentage = None
+        interface_hbond_percentage = 0
         #interface_bunsch_percentage = None
 	
     # calculate binder energy score
