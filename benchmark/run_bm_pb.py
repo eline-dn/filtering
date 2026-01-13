@@ -57,8 +57,13 @@ target_dict={# from bc:
   "ifnar2": "2LAG",
 "human-mzb1-perp1":"7AAH",
 "il7r": "5J11",
-"human-idi2":"2PNY"}
-target2skip= ["BetV1" , "PD1", "PD-L1","CLDN1","Sas6", "human-tnfa"]
+"human-idi2":"2PNY",
+"hnmt":"1JQD",
+"human-pmvk":"3CH4",
+"human-phyh":"2A1X",
+"egfr":"1IVO"
+}
+target2skip= ["BetV1" , "PD1", "PD-L1","CLDN1","Sas6", "human-tnfa", "mdm2", "fgf-r1"]
 
 def target2pdb(target_name, target_dict, target2skip):
   if (target_name in target2skip.keys()) or (target_name not in target_dict.keys()) :
