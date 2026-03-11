@@ -46,20 +46,20 @@ target_dict={# from bc:
             "HER2":"1N8Z",
             "SpCas9": "4ZT0",
             # from proteinbase
-  "human-pdgfr-beta":"3MJG",
-  "human-insulin-receptor":"9DNI",
-  "human-gm2a":"1PUB",
-  "human-orm2": "3KQ0",
+  "human-pdgfr-beta":"3MJG", #ok
+  "human-insulin-receptor":"9DNI", #ok
+  "human-gm2a":"1PUB", #ok
+  "human-orm2": "3KQ0", #ok
   "human-ambp": "3QKG",
   "spcas9": "4ZT0",
   "der21": "5YNY",
   "der7": "3UV1",
   "ifnar2": "2LAG",
-"human-mzb1-perp1":"7AAH",
-"il7r": "5J11",
-"human-idi2":"2PNY",
-"hnmt":"1JQD",
-"human-pmvk":"3CH4",
+"human-mzb1-perp1":"7AAH", #ok
+"il7r": "5J11", #ok
+"human-idi2":"2PNY", #ok
+"hnmt":"1JQD", #ok
+"human-pmvk":"3CH4", # failed
 "human-phyh":"2A1X",
 "egfr":"1IVO"
 }
@@ -70,7 +70,6 @@ def target2pdb(target_name, target_dict, target2skip):
     return(np.nan)
   else:
     return target_dict[target_name]
-  
   
 binder_csv["target_pdb_id"]=binder_csv["binding_target"].apply(target2pdb, target_dict=target_dict, target2skip=target2skip)
 binder_csv=binder_csv.dropna(subset=["target_pdb_id"])
@@ -293,9 +292,13 @@ for binder_name in binder_csv['id']:
     try:
       ref_chain = ref_model["A"]
     except KeyError:
-      print(f"Reference chain '{A}' not found in {target_pdb_path}.")
+      print(f"Reference chain 'A' not found in {target_pdb_path}.")
       continue
-    
+    # check if this binder was already done:
+    predicted_complex_pdb = os.path.join(predicted_folder, f"{binder_name}_model_1_repredicted.pdb")
+    if os.path.isfile(predicted_complex_pdb):
+        print(f"Binder {binder_name} already processed, skipping.")
+        continue
     # 1 - reprediction with pdb template
     binder_sequence=binder_csv.loc[binder_csv['id'] == binder_name, 'sequence'].iloc[0]
     binder_length=len(binder_sequence)
